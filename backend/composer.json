@@ -1,0 +1,17 @@
+{
+    "name": "ezequielgarcia/backend",
+    "description": "Api de vueJs con php y ORM",
+    "autoload": {
+        "psr-4": {
+            "Ezequielgarcia\\Backend\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "ZekiDev"
+        }
+    ],
+    "require": {
+        "bramus/router":"^1.6"
+    }
+}

@@ -28,29 +28,20 @@ const createClient = async () => {
 };
 const isEditing = ref(false);
 const editedClient = ref(null);
-const updateClient = async (id) => {
-  isEditing.value = true;
-  if  (!isEditing.value) return;
-  editedClient.value = cliente.value.find((item) => item.id === id);
-  //console.log(editedClient.value);
-};
-const cancelEdition = () => {
-  isEditing.value= false;
-  editedClient.value = null;
-};
-const saveChanges = async () =>{
+const updateClient = async () => {
   try {
-    await axios.put(`${apiUrl}/${editedClient.value.id}`, editedClient.value);
+    const resp = await axios.put(`${apiUrl}${editedClient.value.id}`, editedClient.value);
+    const index = cliente.value.findIndex(cliente => cliente.id === editedClient.value.id);
+    cliente.value.splice(index, 1, resp.data);
+    alert("Se actualizó correctamente!");
     isEditing.value = false;
-    editedClient.value = null;
     cargarClientes();
-    alert('Se han guardado los cambios');
-  }catch(err){
-    console.log(err);
-    alert('No se pudieron guardar los cambios');
+  } catch (error) {
+    console.log("Error al editar el Cliente", error.response.data);
+    alert("Ocurrió un Error al Actualizar el Cliente");
   }
-  
 };
+
 const deleteClient = async (id) => {
   let confirmacion = confirm("¿Desea eliminar este registro?");
   if (!confirmacion) return;
@@ -80,22 +71,13 @@ onMounted(() => {
           <div class="card">
             <div class="card-header">Clientes</div>
             <div class="card-body">
-              <form
-                @submit.prevent="isEditing ? saveChanges() : createClient()"
-              >
+              <form @submit.prevent="createClient">
                 Nombre:
                 <input
                   class="form-control"
                   type="text"
                   name="name"
-                  :value="
-                    isEditing ? editedClient.name : newClient.name
-                  "
-                  @input="
-                    isEditing
-                      ? (editedClient.name = $event.target.value)
-                      : (newClient.name = $event.target.value)
-                  "
+                  v-model="newClient.name"
                   id="name"
                   required
                 />
@@ -104,14 +86,7 @@ onMounted(() => {
                   class="form-control"
                   type="text"
                   name="lastname"
-                  :value="
-                    isEditing ? editedClient.lastname : newClient.lastname
-                  "
-                  @input="
-                    isEditing
-                      ? (editedClient.lastname = $event.target.value)
-                      : (newClient.lastname = $event.target.value)
-                  "
+                  v-model="newClient.lastname"
                   id="lastname"
                   required
                 />
@@ -120,21 +95,13 @@ onMounted(() => {
                   class="form-control"
                   type="email"
                   name="email"
-                  :value="
-                    isEditing ? editedClient.mail : newClient.mail
-                  "
-                  @input="
-                    isEditing
-                      ? (editedClient.mail = $event.target.value)
-                      : (newClient.mail = $event.target.value)
-                  "
+                  v-model="newClient.mail"
                   id="email"
                   required
                 /><br /><br />
                 <button class="btn btn-success" type="submit">
-                  {{ isEditing ? "Actualizar Cliente" : "Crear Cliente" }}
-                </button>&nbsp;
-                <button v-if="isEditing" class="btn btn-danger" type="button" @click="cancelEdition()">Cancelar</button>
+                  {{ isEditing ? 'Actualizar Cliente' : 'Crear Cliente' }}
+                </button>
               </form>
             </div>
             <div class="card-footer">ZekiDev</div>
@@ -154,8 +121,8 @@ onMounted(() => {
                     class="btn btn-danger btn-sm"
                     @click="deleteClient(clientes.id)"
                   >
-                    Eliminar</button
-                  >&nbsp;
+                    Eliminar
+                  </button>&nbsp;
                   <button
                     class="btn btn-warning btn-sm"
                     @click="updateClient(clientes.id)"
